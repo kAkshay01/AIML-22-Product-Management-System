@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <th:block th:fragment="pageHead(title)">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title th:text="${title} + ' | Product Management System'">Product Management System</title>
+        <link rel="stylesheet" th:href="@{/css/style.css}">
+    </th:block>
+</head>
+<body>
+    <nav class="navbar" th:fragment="navbar">
+        <div class="nav-container">
+            <a th:href="@{/}" class="nav-brand">📦 Product Management System</a>
+            <ul class="nav-links">
+                <!-- Only reachable once logged in -->
+                <th:block sec:authorize="isAuthenticated()">
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/products}">View Products</a></li>
+                    <li><a th:href="@{/categories}">Categories</a></li>
+                </th:block>
+
+                <!-- Add Product is supplier-only; customers can browse but not add -->
+                <li sec:authorize="hasRole('SUPPLIER')"><a th:href="@{/products/new}">Add Product</a></li>
+
+                <!-- Customer-only links -->
+                <li sec:authorize="hasRole('CUSTOMER')"><a th:href="@{/customer/dashboard}">My Dashboard</a></li>
+                <li sec:authorize="hasRole('CUSTOMER')"><a th:href="@{/customer/cart}">🛒 My Cart</a></li>
+                <li sec:authorize="hasRole('CUSTOMER')"><a th:href="@{/customer/orders}">🧾 My Orders</a></li>
+                <!-- Supplier-only link -->
+                <li sec:authorize="hasRole('SUPPLIER')"><a th:href="@{/supplier/dashboard}">My Products</a></li>
+                <li sec:authorize="hasRole('SUPPLIER')"><a th:href="@{/supplier/orders}">📥 Orders</a></li>
+
+                <!-- Signed-in: show who's logged in + logout -->
+                <li sec:authorize="isAuthenticated()">
+                    <span class="nav-user" sec:authentication="name"></span>
+                </li>
+                <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Log Out</a></li>
+
+                <!-- Anonymous: show login/register -->
+                <li sec:authorize="isAnonymous()"><a th:href="@{/login}">Login</a></li>
+                <li sec:authorize="isAnonymous()"><a th:href="@{/register}">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+</body>
+</html>

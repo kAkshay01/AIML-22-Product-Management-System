@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: pageHead('My Cart')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>My Cart 🛒</h1>
+        <a th:href="@{/customer/dashboard}" class="btn btn-secondary">← Continue Shopping</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <table class="product-table" th:if="${!cart.items.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Brand</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Line Total</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${cart.items}">
+            <td>
+                <img th:if="${item.product.imageUrl != null and !item.product.imageUrl.isEmpty()}"
+                     th:src="${item.product.imageUrl}" class="product-thumb" alt="Product image"
+                     onerror="this.outerHTML='&lt;span class=&quot;product-thumb-placeholder&quot;&gt;📦&lt;/span&gt;';"/>
+                <span th:if="${item.product.imageUrl == null or item.product.imageUrl.isEmpty()}" class="product-thumb-placeholder">📦</span>
+            </td>
+            <td th:text="${item.product.name}"></td>
+            <td th:text="${item.product.brand}"></td>
+            <td th:text="${item.product.category}"></td>
+            <td th:text="${'₹' + #numbers.formatDecimal(item.product.price, 1, 2)}"></td>
+            <td>
+                <form th:action="@{/customer/cart/update/{id}(id=${item.id})}" method="post" style="display:flex; gap:6px; align-items:center;">
+                    <input type="number" name="quantity" th:value="${item.quantity}" min="0" th:max="${item.product.quantity}"
+                           style="width:70px; padding:6px 8px; border:1px solid var(--slate-400); border-radius:6px;"/>
+                    <button type="submit" class="btn btn-small btn-secondary">Update</button>
+                </form>
+            </td>
+            <td th:text="${'₹' + #numbers.formatDecimal(item.lineTotal, 1, 2)}"></td>
+            <td class="actions">
+                <form th:action="@{/customer/cart/remove/{id}(id=${item.id})}" method="post">
+                    <button type="submit" class="btn btn-small btn-danger"
+                            onclick="return confirm('Remove this item from your cart?');">Remove</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${!cart.items.isEmpty()}" class="page-header" style="margin-top: 22px;">
+        <h2>Total: <span th:text="${'₹' + #numbers.formatDecimal(cartTotal, 1, 2)}"></span></h2>
+        <div class="actions">
+            <form th:action="@{/customer/cart/clear}" method="post">
+                <button type="submit" class="btn btn-secondary"
+                        onclick="return confirm('Clear your entire cart?');">Clear Cart</button>
+            </form>
+            <a th:href="@{/customer/checkout}" class="btn btn-primary">💳 Proceed to Checkout</a>
+        </div>
+    </div>
+
+    <p th:if="${cart.items.isEmpty()}" class="empty-state">Your cart is empty. Go add some products!</p>
+</div>
+</body>
+</html>

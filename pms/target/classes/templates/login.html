@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: pageHead('Login')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container container-narrow">
+    <div class="form-card">
+        <h1>Log In</h1>
+        <p class="hint">Choose your account type and sign in below.</p>
+
+        <div class="alert alert-success" th:if="${registeredMessage != null}" th:text="${registeredMessage}"></div>
+        <div class="alert alert-success" th:if="${registeredMessage == null and param.registered != null}">Account created! Please log in.</div>
+        <div class="alert alert-error" th:if="${param.error != null}">Incorrect username or password.</div>
+        <div class="alert alert-error" th:if="${param.roleMismatch != null}">
+            That account isn't registered as the role you selected. Please choose the correct role and try again.
+        </div>
+        <div class="alert alert-success" th:if="${param.loggedOut != null}">You've been logged out.</div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="loginRole">Log in as</label>
+                <select id="loginRole" name="loginRole" required>
+                    <option value="CUSTOMER">Customer</option>
+                    <option value="SUPPLIER">Supplier</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autofocus/>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required/>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">🔐 Log In</button>
+            </div>
+        </form>
+
+        <p class="hint" style="margin-top: 18px;">
+            Don't have an account? <a th:href="@{/register}">Register here</a>.
+        </p>
+    </div>
+</div>
+</body>
+</html>

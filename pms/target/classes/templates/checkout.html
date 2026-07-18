@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: pageHead('Checkout')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container container-narrow">
+    <div class="page-header">
+        <h1>Checkout</h1>
+        <a th:href="@{/customer/cart}" class="btn btn-secondary">← Back to Cart</a>
+    </div>
+
+    <div class="form-card" style="margin-bottom: 22px;">
+        <h3 style="margin-top:0;">Order Summary</h3>
+        <table class="product-table">
+            <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Line Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${cart.items}">
+                <td th:text="${item.product.name}"></td>
+                <td th:text="${item.quantity}"></td>
+                <td th:text="${'₹' + #numbers.formatDecimal(item.lineTotal, 1, 2)}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <h2 style="text-align:right; margin-bottom:0;">
+            Total: <span th:text="${'₹' + #numbers.formatDecimal(cartTotal, 1, 2)}"></span>
+        </h2>
+    </div>
+
+    <div class="form-card">
+        <h1>Payment &amp; Delivery</h1>
+
+        <form th:action="@{/customer/checkout/place}" method="post" id="checkoutForm">
+
+            <div class="form-group">
+                <label for="shippingAddress">Delivery Address</label>
+                <textarea id="shippingAddress" name="shippingAddress" rows="3" required
+                          placeholder="House no, street, city, PIN code"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Payment Method</label>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:6px;">
+                    <label style="font-weight:500; display:flex; align-items:center; gap:8px;">
+                        <input type="radio" name="paymentMethod" value="CASH_ON_DELIVERY" checked onchange="togglePaymentFields()"/>
+                        💵 Cash on Delivery
+                    </label>
+                    <label style="font-weight:500; display:flex; align-items:center; gap:8px;">
+                        <input type="radio" name="paymentMethod" value="CARD" onchange="togglePaymentFields()"/>
+                        💳 Credit / Debit Card
+                    </label>
+                    <label style="font-weight:500; display:flex; align-items:center; gap:8px;">
+                        <input type="radio" name="paymentMethod" value="UPI" onchange="togglePaymentFields()"/>
+                        📱 UPI
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" id="cardFields" style="display:none;">
+                <label for="cardNumber">Card Number</label>
+                <input type="text" id="cardNumber" name="cardNumber" maxlength="19"
+                       placeholder="1234 5678 9012 3456" inputmode="numeric" autocomplete="off"/>
+                <p class="hint" style="margin: 6px 0 0;">
+                    This is a simulated checkout — only the last 4 digits are ever used (to show
+                    "Card ending in ••••" on your order), and nothing is charged or stored.
+                </p>
+            </div>
+
+            <div class="form-group" id="upiFields" style="display:none;">
+                <label for="upiId">UPI ID</label>
+                <input type="text" id="upiId" name="upiId" placeholder="yourname@bank" autocomplete="off"/>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">✅ Place Order</button>
+                <a th:href="@{/customer/cart}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function togglePaymentFields() {
+        var method = document.querySelector('input[name="paymentMethod"]:checked').value;
+        document.getElementById('cardFields').style.display = (method === 'CARD') ? 'block' : 'none';
+        document.getElementById('upiFields').style.display = (method === 'UPI') ? 'block' : 'none';
+        document.getElementById('cardNumber').required = (method === 'CARD');
+        document.getElementById('upiId').required = (method === 'UPI');
+    }
+    togglePaymentFields();
+</script>
+</body>
+</html>

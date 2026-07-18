@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: pageHead('Order Details')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container container-narrow">
+
+    <div class="alert alert-success" th:if="${placed}">
+        🎉 Your order has been placed successfully!
+    </div>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <div class="page-header">
+        <h1>Order #<span th:text="${order.id}"></span></h1>
+        <div class="actions">
+            <form th:if="${order.cancellable}" th:action="@{/customer/orders/{id}/cancel(id=${order.id})}"
+                  method="post" style="display:inline;">
+                <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('Cancel this order? Items will be returned to stock.');">✖ Cancel Order</button>
+            </form>
+            <a th:href="@{/customer/orders}" class="btn btn-secondary">← All Orders</a>
+        </div>
+    </div>
+
+    <div class="form-card" style="margin-bottom: 22px;">
+        <p><strong>Placed:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd MMM yyyy, HH:mm')}"></span></p>
+        <p>
+            <strong>Status:</strong>
+            <span th:if="${order.status.name() == 'CANCELLED'}" class="badge badge-danger" th:text="${order.status}"></span>
+            <span th:unless="${order.status.name() == 'CANCELLED'}" class="badge badge-info" th:text="${order.status}"></span>
+        </p>
+        <p><strong>Delivery Address:</strong> <span th:text="${order.shippingAddress}"></span></p>
+        <p>
+            <strong>Payment:</strong>
+            <span th:if="${order.paymentMethod.name() == 'CASH_ON_DELIVERY'}">Cash on Delivery</span>
+            <span th:if="${order.paymentMethod.name() == 'CARD'}" th:text="${order.paymentReference}">Card</span>
+            <span th:if="${order.paymentMethod.name() == 'UPI'}" th:text="'UPI — ' + ${order.paymentReference}">UPI</span>
+        </p>
+    </div>
+
+    <table class="product-table">
+        <thead>
+        <tr>
+            <th>Image</th>
+            <th>Item</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Line Total</th>
+            <th>Fulfilment</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${order.items}">
+            <td>
+                <img th:if="${item.product != null and item.product.imageUrl != null and !item.product.imageUrl.isEmpty()}"
+                     th:src="${item.product.imageUrl}" class="product-thumb" alt="Product image"
+                     onerror="this.outerHTML='&lt;span class=&quot;product-thumb-placeholder&quot;&gt;📦&lt;/span&gt;';"/>
+                <span th:if="${item.product == null or item.product.imageUrl == null or item.product.imageUrl.isEmpty()}" class="product-thumb-placeholder">📦</span>
+            </td>
+            <td th:text="${item.productName}"></td>
+            <td th:text="${'₹' + #numbers.formatDecimal(item.unitPrice, 1, 2)}"></td>
+            <td th:text="${item.quantity}"></td>
+            <td th:text="${'₹' + #numbers.formatDecimal(item.lineTotal, 1, 2)}"></td>
+            <td>
+                <span th:if="${item.received}" class="badge badge-success">Received</span>
+                <span th:unless="${item.received}" class="badge badge-warning">Pending</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2 style="text-align:right; margin-top: 22px;">
+        Total: <span th:text="${'₹' + #numbers.formatDecimal(order.totalAmount, 1, 2)}"></span>
+    </h2>
+</div>
+</body>
+</html>

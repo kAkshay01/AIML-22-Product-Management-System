@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: pageHead('Home')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container">
+    <div class="hero">
+        <h1>Welcome to the Product Management System</h1>
+        <p>Manage your product inventory — add, update, search, and track stock levels with ease.</p>
+        <div class="hero-actions">
+            <a sec:authorize="hasRole('SUPPLIER')" th:href="@{/products/new}" class="btn btn-primary">➕ Add Product</a>
+            <a th:href="@{/products}" class="btn btn-secondary">📋 View Products</a>
+        </div>
+    </div>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h3>Add Product</h3>
+            <p>Register new products with brand, category, price, and stock details.</p>
+        </div>
+        <div class="feature-card">
+            <h3>View &amp; Search</h3>
+            <p>Browse the full catalog or search by name and category, with sorting and pagination.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Update &amp; Delete</h3>
+            <p>Keep your inventory accurate by editing or removing products as needed.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Manage Categories</h3>
+            <p>See every category currently in use across your product catalog.</p>
+        </div>
+    </div>
+
+    <div class="hero hero-alt">
+        <h1>Welcome back, <span sec:authentication="name"></span> 👋</h1>
+        <p sec:authorize="hasRole('CUSTOMER')">Head to your dashboard to browse the full catalog.</p>
+        <p sec:authorize="hasRole('SUPPLIER')">Head to your dashboard to manage the products you supply.</p>
+        <div class="hero-actions">
+            <a sec:authorize="hasRole('CUSTOMER')" th:href="@{/customer/dashboard}" class="btn btn-primary">🛒 My Dashboard</a>
+            <a sec:authorize="hasRole('SUPPLIER')" th:href="@{/supplier/dashboard}" class="btn btn-primary">📦 My Products</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

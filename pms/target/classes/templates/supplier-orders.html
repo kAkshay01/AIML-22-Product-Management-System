@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: pageHead('Incoming Orders')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Incoming Orders 📥</h1>
+        <a th:href="@{/supplier/dashboard}" class="btn btn-secondary">← My Products</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <table class="product-table" th:if="${!orderItems.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Image</th>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Line Total</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${orderItems}" th:classappend="${item.order.status.name() == 'CANCELLED'} ? 'cancelled-row' : ''">
+            <td>
+                <img th:if="${item.product != null and item.product.imageUrl != null and !item.product.imageUrl.isEmpty()}"
+                     th:src="${item.product.imageUrl}" class="product-thumb" alt="Product image"
+                     onerror="this.outerHTML='&lt;span class=&quot;product-thumb-placeholder&quot;&gt;📦&lt;/span&gt;';"/>
+                <span th:if="${item.product == null or item.product.imageUrl == null or item.product.imageUrl.isEmpty()}" class="product-thumb-placeholder">📦</span>
+            </td>
+            <td th:text="${item.order.id}"></td>
+            <td th:text="${#temporals.format(item.order.orderDate, 'dd MMM yyyy, HH:mm')}"></td>
+            <td th:text="${item.productName}"></td>
+            <td th:text="${item.quantity}"></td>
+            <td th:text="${'₹' + #numbers.formatDecimal(item.lineTotal, 1, 2)}"></td>
+            <td>
+                <span th:if="${item.order.status.name() == 'CANCELLED'}" class="badge badge-danger">Cancelled</span>
+                <span th:unless="${item.order.status.name() == 'CANCELLED'}"
+                      th:class="${item.received} ? 'badge badge-success' : 'badge badge-warning'"
+                      th:text="${item.received} ? 'Received' : 'Pending'"></span>
+            </td>
+            <td class="actions">
+                <form th:if="${!item.received and item.order.status.name() != 'CANCELLED'}"
+                      th:action="@{/supplier/orders/receive/{id}(id=${item.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-small btn-primary">✅ Receive Order</button>
+                </form>
+                <span th:if="${item.received}" class="hint" style="margin:0;">Fulfilled</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${orderItems.isEmpty()}" class="empty-state">No orders for your products yet.</p>
+</div>
+</body>
+</html>

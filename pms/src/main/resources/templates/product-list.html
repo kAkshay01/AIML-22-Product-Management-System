@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: pageHead('Products')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Product List</h1>
+        <a sec:authorize="hasRole('SUPPLIER')" th:href="@{/products/new}" class="btn btn-primary">➕ Add Product</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+    <form th:action="@{/products}" method="get" class="search-bar">
+        <input type="text" name="keyword" th:value="${keyword}" placeholder="Search by name or category..."/>
+        <button type="submit" class="btn btn-primary">🔍 Search</button>
+        <a th:href="@{/products}" class="btn btn-secondary" th:if="${keyword}">Clear</a>
+    </form>
+
+    <table class="product-table" th:if="${!products.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Image</th>
+            <th>
+                <a th:href="@{/products(keyword=${keyword}, sortField='id', sortDir=${sortField == 'id' ? reverseSortDir : 'asc'}, page=${currentPage}, size=${pageSize})}">ID</a>
+            </th>
+            <th>
+                <a th:href="@{/products(keyword=${keyword}, sortField='name', sortDir=${sortField == 'name' ? reverseSortDir : 'asc'}, page=${currentPage}, size=${pageSize})}">Name</a>
+            </th>
+            <th>
+                <a th:href="@{/products(keyword=${keyword}, sortField='brand', sortDir=${sortField == 'brand' ? reverseSortDir : 'asc'}, page=${currentPage}, size=${pageSize})}">Brand</a>
+            </th>
+            <th>
+                <a th:href="@{/products(keyword=${keyword}, sortField='category', sortDir=${sortField == 'category' ? reverseSortDir : 'asc'}, page=${currentPage}, size=${pageSize})}">Category</a>
+            </th>
+            <th>
+                <a th:href="@{/products(keyword=${keyword}, sortField='price', sortDir=${sortField == 'price' ? reverseSortDir : 'asc'}, page=${currentPage}, size=${pageSize})}">Price</a>
+            </th>
+            <th>
+                <a th:href="@{/products(keyword=${keyword}, sortField='quantity', sortDir=${sortField == 'quantity' ? reverseSortDir : 'asc'}, page=${currentPage}, size=${pageSize})}">Quantity</a>
+            </th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}" th:classappend="${product.quantity <= 5} ? 'low-stock' : ''">
+            <td>
+                <img th:if="${product.imageUrl != null and !product.imageUrl.isEmpty()}"
+                     th:src="${product.imageUrl}" class="product-thumb" alt="Product image"
+                     onerror="this.outerHTML='&lt;span class=&quot;product-thumb-placeholder&quot;&gt;📦&lt;/span&gt;';"/>
+                <span th:if="${product.imageUrl == null or product.imageUrl.isEmpty()}" class="product-thumb-placeholder">📦</span>
+            </td>
+            <td th:text="${product.id}"></td>
+            <td th:text="${product.name}"></td>
+            <td th:text="${product.brand}"></td>
+            <td th:text="${product.category}"></td>
+            <td th:text="${'₹' + #numbers.formatDecimal(product.price, 1, 2)}"></td>
+            <td>
+                <span th:text="${product.quantity}"></span>
+                <span th:if="${product.quantity <= 5}" class="badge badge-warning">Low Stock</span>
+            </td>
+            <td th:text="${product.description}"></td>
+            <td class="actions">
+                <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-small btn-secondary">Edit</a>
+                <a th:href="@{/products/delete/{id}(id=${product.id})}"
+                   class="btn btn-small btn-danger"
+                   onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${products.isEmpty()}" class="empty-state">No products found.</p>
+
+    <div class="pagination" th:if="${totalPages > 1}">
+        <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+           th:href="@{/products(keyword=${keyword}, sortField=${sortField}, sortDir=${sortDir}, page=${i}, size=${pageSize})}"
+           th:text="${i + 1}"
+           th:classappend="${i == currentPage} ? 'active' : ''"
+           class="page-link"></a>
+    </div>
+</div>
+</body>
+</html>

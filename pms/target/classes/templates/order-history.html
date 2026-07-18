@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: pageHead('My Orders')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>My Orders</h1>
+        <a th:href="@{/customer/dashboard}" class="btn btn-secondary">← Continue Shopping</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+    <table class="product-table" th:if="${!orders.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Order #</th>
+            <th>Date</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.id}"></td>
+            <td th:text="${#temporals.format(order.orderDate, 'dd MMM yyyy, HH:mm')}"></td>
+            <td th:text="${order.items.size()}"></td>
+            <td th:text="${'₹' + #numbers.formatDecimal(order.totalAmount, 1, 2)}"></td>
+            <td>
+                <span th:if="${order.paymentMethod.name() == 'CASH_ON_DELIVERY'}">Cash on Delivery</span>
+                <span th:if="${order.paymentMethod.name() == 'CARD'}">Card</span>
+                <span th:if="${order.paymentMethod.name() == 'UPI'}">UPI</span>
+            </td>
+            <td>
+                <span th:if="${order.status.name() == 'CANCELLED'}" class="badge badge-danger" th:text="${order.status}"></span>
+                <span th:unless="${order.status.name() == 'CANCELLED'}" class="badge badge-info" th:text="${order.status}"></span>
+            </td>
+            <td class="actions">
+                <a th:href="@{/customer/orders/{id}(id=${order.id})}" class="btn btn-small btn-secondary">View</a>
+                <form th:if="${order.cancellable}" th:action="@{/customer/orders/{id}/cancel(id=${order.id})}"
+                      method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-small btn-danger"
+                            onclick="return confirm('Cancel this order? Items will be returned to stock.');">✖ Cancel</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${orders.isEmpty()}" class="empty-state">You haven't placed any orders yet.</p>
+</div>
+</body>
+</html>

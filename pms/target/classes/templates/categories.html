@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: pageHead('Categories')}"></head>
+<body>
+<nav th:replace="~{fragments :: navbar}"></nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Categories</h1>
+    </div>
+    <p class="hint">Categories are derived from your product catalog. Add a product with a new category name to create one.</p>
+
+    <div class="category-grid" th:if="${!categories.isEmpty()}">
+        <div class="category-chip" th:each="cat : ${categories}">
+            <span th:text="${cat}"></span>
+            <a th:href="@{/products(keyword=${cat})}" class="btn btn-small btn-secondary">View Products</a>
+        </div>
+    </div>
+
+    <p th:if="${categories.isEmpty()}" class="empty-state">No categories yet. Add a product to get started.</p>
+</div>
+</body>
+</html>
